@@ -14,7 +14,7 @@ return {
 		end, { desc = "Git pull with rebase" })
 		-- NOTE: It allows me to easily set the branch i am pushing and any tracking
 		-- needed if i did not set the branch up correctly
-		vim.keymap.set("n", "<leader>gpo", ":Git push -u origin ", { desc = "Git push origin" })
+		vim.keymap.set("n", "<leader>go", ":Git push -u origin ", { desc = "Git push origin" })
 		vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>")
 		vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>")
 	end,
