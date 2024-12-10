@@ -67,8 +67,6 @@ vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>")
 
 vim.keymap.set("n", "<C-s>", ":LetItSnow<CR>")
 
-vim.keymap.set("n", "<CapsLock>", "<Esc>")
-
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
 -- [[ Basic Autocommands ]]
 
