@@ -6,16 +6,16 @@ winget install JanDeDobbeleer.OhMyPosh -s winget
 winget install -e --id Git.Git
 
 git config --global alias.co checkout
-git config --gloabl alias.ci commit
-git config --gloabl alias.rb rebase
-git config --gloabl alias.vibe status
-git config --gloabl alias.yeet !git push origin HEAD
-git config --gloabl alias.oops reset --soft HEAD^
-git config --gloabl alias.yikes reset --hard HEAD^
-git config --gloabl alias.milk pull
-git config --gloabl alias.hide stash
-git config --gloabl alias.peek stash pop
-git config --gloabl alias.home swith main
+git config --global alias.ci commit
+git config --global alias.rb rebase
+git config --global alias.vibe status
+git config --global alias.yeet !git push origin HEAD
+git config --global alias.oops reset --soft HEAD^
+git config --global alias.yikes reset --hard HEAD^
+git config --global alias.milk pull
+git config --global alias.hide stash
+git config --global alias.peek stash pop
+git config --global alias.home swith main
 
 winget install Microsoft.PowerToys -s winget
 
