@@ -27,3 +27,6 @@ $wshShell = New-Object -ComObject WScript.Shell
 $shortcut = $wshShell.CreateShortcut($shortcutPath)
 $shortcut.TargetPath = "./remap.ahk"
 $shortcut.Save()
+
+Set-Location -Path "C:\Program Files\Neovim\bin\lua"
+git clone https://github.com/HugoUlm/dotfiles.git
