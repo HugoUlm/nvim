@@ -11,13 +11,13 @@ git config --global alias.co checkout
 git config --global alias.ci commit
 git config --global alias.rb rebase
 git config --global alias.vibe status
-git config --global alias.yeet !git push origin HEAD
-git config --global alias.oops reset --soft HEAD^
-git config --global alias.yikes reset --hard HEAD^
+git config --global alias.yeet "!git push origin HEAD"
+git config --global alias.oops "reset --soft HEAD^"
+git config --global alias.yikes "reset --hard HEAD^"
 git config --global alias.milk pull
 git config --global alias.hide stash
-git config --global alias.peek stash pop
-git config --global alias.home swith main
+git config --global alias.peek "stash pop"
+git config --global alias.home "swith main"
 
 winget install Microsoft.PowerToys -s winget
 
