@@ -17,7 +17,7 @@ git config --global alias.yikes "reset --hard HEAD^"
 git config --global alias.milk pull
 git config --global alias.hide stash
 git config --global alias.peek "stash pop"
-git config --global alias.home "swith main"
+git config --global alias.home "switch main"
 
 winget install Microsoft.PowerToys -s winget
 
