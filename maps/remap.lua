@@ -28,6 +28,13 @@ vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>")
 
 vim.keymap.set("n", "<C-s>", ":LetItSnow<CR>")
 
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
+vim.keymap.set(
+	"n",
+	"<leader>s",
+	[[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]],
+	{ desc = "Replace current word in file" }
+)
 
-vim.keymap.set("x", "<C-c>", [[:s/\(\w.*\)/]], { desc = "Replace selected line(s)" })
+vim.keymap.set("x", "<leader>s", [[:s/\(\w.*\)/]], { desc = "Replace selected line(s)" })
+
+vim.keymap.set("n", "<C-f>", [[/\<<C-r><C-w>\><CR>]], { desc = "Search current word in file" })
