@@ -74,12 +74,12 @@ local Git = {
 		self.head = vim.fn.FugitiveHead()
 		return type(self.head) == "string"
 	end,
-	hl = { bg = utils.get_highlight("@variable.parameter").fg },
+	hl = { fg = utils.get_highlight("@variable.parameter").fg },
 	{
 		provider = function(self)
 			return "  " .. self.head
 		end,
-		hl = { fg = "black", bold = true },
+		hl = { bg = default_bg, bold = true },
 	},
 	Space,
 	{
@@ -94,7 +94,7 @@ local Git = {
 			local count = self.status_dict and self.status_dict.added or 0
 			return count > 0 and ("+" .. count)
 		end,
-		hl = { fg = "black" },
+		hl = { bg = default_bg },
 	},
 	Space,
 	{
@@ -102,7 +102,7 @@ local Git = {
 			local count = self.status_dict and self.status_dict.removed or 0
 			return count > 0 and ("-" .. count)
 		end,
-		hl = { fg = "black" },
+		hl = { bg = default_bg },
 	},
 	Space,
 	{
@@ -110,7 +110,7 @@ local Git = {
 			local count = self.status_dict and self.status_dict.changed or 0
 			return count > 0 and ("~" .. count)
 		end,
-		hl = { fg = "black" },
+		hl = { bg = default_bg },
 	},
 	{
 		condition = function(self)
@@ -132,7 +132,7 @@ local FileIcon = {
 		return self.icon and (" " .. self.icon .. " ")
 	end,
 	hl = function(self)
-		return { bg = self.icon_color, fg = helper.invertHex(self.icon_color) }
+		return { bg = default_bg, fg = self.icon_color }
 	end,
 }
 
@@ -162,7 +162,7 @@ local FileName = {
 		end,
 	},
 	hl = function(self)
-		return { bg = self.color, fg = helper.invertHex(self.color), bold = true }
+		return { bg = default_bg, fg = self.color, bold = true }
 	end,
 }
 
@@ -177,7 +177,7 @@ local FileFlags = {
 		end,
 		provider = "[+] ",
 		hl = function(self)
-			return { bg = self.color }
+			return { fg = self.color }
 		end,
 	},
 	{
@@ -186,11 +186,11 @@ local FileFlags = {
 		end,
 		provider = "   ",
 		hl = function(self)
-			return { bg = self.color }
+			return { fg = self.color }
 		end,
 	},
 	hl = function(self)
-		return { fg = helper.invertHex(self.color) }
+		return { bg = default_bg }
 	end,
 }
 
@@ -203,7 +203,7 @@ local FileNameBlockSpace = {
 		provider = " ",
 	},
 	hl = function(self)
-		return { bg = self.color }
+		return { bg = default_bg }
 	end,
 }
 
@@ -216,7 +216,7 @@ local FileNameBlock = {
 	FileName,
 	FileNameBlockSpace,
 	FileFlags,
-	{ provider = "%<" },
+	--{ provider = "%<" },
 }
 
 local FileType = {
@@ -230,14 +230,14 @@ local Ruler = {
 	-- %L = number of lines in the buffer
 	-- %c = column number
 	provider = "[%7(%l/%3L%):%2c]",
-	hl = { fg = utils.get_highlight("String").fg, bold = true },
+	hl = { fg = utils.get_highlight("Violet").fg, bold = true },
 }
 
 local Diagnostics = {
 	static = {
-		error_icon = " ",
-		warn_icon = " ",
-		info_icon = " ",
+		error_icon = " ",
+		warn_icon = "",
+		info_icon = "",
 		hint_icon = "",
 	},
 	init = function(self)
@@ -286,7 +286,7 @@ local LSPActive = {
 		self.clients = require("hugoulm.utils").lsp_get_clients({ bufnr = 0 })
 		return next(self.clients) ~= nil
 	end,
-	hl = { fg = utils.get_highlight("String").fg, bold = true },
+	hl = { fg = utils.get_highlight("NightflyViolet").fg, bold = true },
 	{
 		provider = function(self)
 			local names = {}
