@@ -35,7 +35,7 @@ require("lazy").setup({
 	require("hugoulm.plugins.surround"),
 	require("hugoulm.plugins.heirline.heirline"),
 	require("hugoulm.plugins.lsp-lens"),
-	require("hugoulm.plugins.dashboard"),
+	--require("hugoulm.plugins.dashboard"),
 	require("hugoulm.plugins.let-it-snow"),
 	require("hugoulm.plugins.smear-cursor"),
 	require("hugoulm.plugins.colors"),
