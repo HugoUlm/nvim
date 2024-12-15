@@ -68,10 +68,10 @@
             },
             {
                 "adjustIndistinguishableColors": "always",
-                "backgroundImage": "C:\\Users\\wio950\\Downloads\\dark-landscape.jpg",
-                "backgroundImageOpacity": 0,
-                "backgroundImageStretchMode": "uniformToFill",
-                "colorScheme": "One Half Dark",
+                "backgroundImage": "desktopWallpaper",
+                "backgroundImageOpacity": 0.1,
+                "backgroundImageStretchMode": "uniform",
+                "colorScheme": "IBM 5153",
                 "cursorShape": "filledBox",
                 "elevate": true,
                 "experimental.retroTerminalEffect": false,
@@ -81,7 +81,7 @@
                 "opacity": 1,
                 "scrollbarState": "hidden",
                 "source": "Windows.Terminal.PowershellCore",
-                "useAcrylic": true
+                "useAcrylic": false
             },
             {
                 "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
