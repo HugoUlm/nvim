@@ -41,14 +41,15 @@ local ViMode = {
 		self.mode = vim.api.nvim_get_mode().mode
 	end,
 	provider = function(self)
-		return "  %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
+		--return "  %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
+		return " %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
 	end,
 	hl = function(self)
 		local hls = self.modes[self.mode][3]
 		for _, h in ipairs(hls or {}) do
 			local ok, def = pcall(vim.api.nvim_get_hl, 0, { name = h, link = true })
 			if ok and type(def) == "table" and (def.fg or def.bg or def.link) then
-				return { fg = "black", bg = def.fg, bold = true }
+				return { fg = def.fg, bg = default_bg, bold = true }
 			end
 		end
 	end,
@@ -65,21 +66,16 @@ local ViMode = {
 
 local Git = {
 	init = function(self)
-		-- gitsigns buffer changes
 		self.status_dict = vim.b.gitsigns_status_dict
 		self.has_changes = self.status_dict
 			and (self.status_dict.added ~= 0 or self.status_dict.removed ~= 0 or self.status_dict.changed ~= 0)
 	end,
 	condition = function(self)
-		-- priotize gitsigns, otherwise try vim-fugitive
-		self.head = vim.b.gitsigns_head
-		if not self.head and vim.g.loaded_fugitive == 1 then
-			self.head = vim.fn.FugitiveHead()
-		end
+		self.head = vim.fn.FugitiveHead()
 		return type(self.head) == "string"
 	end,
 	hl = { bg = utils.get_highlight("@variable.parameter").fg },
-	{ -- git branch name
+	{
 		provider = function(self)
 			return "  " .. self.head
 		end,
@@ -141,10 +137,8 @@ local FileIcon = {
 }
 
 local FileName = {
-	-- flexible: shorten path if space doesn't allow for full path
 	flexible = 2,
 	init = function(self)
-		-- make relative, see :h filename-modifers
 		self.relname = vim.fn.fnamemodify(self.filename, ":.")
 		local ext = vim.fn.fnamemodify(self.filename, ":e")
 		if self.relname == "" then
@@ -222,7 +216,7 @@ local FileNameBlock = {
 	FileName,
 	FileNameBlockSpace,
 	FileFlags,
-	{ provider = "%<" }, -- cut here when there's not enough space
+	{ provider = "%<" },
 }
 
 local FileType = {
@@ -240,12 +234,7 @@ local Ruler = {
 }
 
 local Diagnostics = {
-	-- Since this is nested inside LSPActive the events aren't called
 	static = {
-		-- error_icon = vim.fn.sign_getdefined("DiagnosticSignError")[1].text,
-		-- warn_icon = vim.fn.sign_getdefined("DiagnosticSignWarn")[1].text,
-		-- info_icon = vim.fn.sign_getdefined("DiagnosticSignInfo")[1].text,
-		-- hint_icon = vim.fn.sign_getdefined("DiagnosticSignHint")[1].text,
 		error_icon = " ",
 		warn_icon = " ",
 		info_icon = " ",
