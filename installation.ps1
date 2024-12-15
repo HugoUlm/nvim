@@ -1,3 +1,11 @@
+param(
+	[string]$user
+)
+
+if ($null -eq $user) {
+	Write-Error "Please provide a user"
+}
+
 winget install --id=Neovim.Neovim  -e
 winget install --id=junegunn.fzf  -e
 winget install --id=BurntSushi.ripgrep.MSVC  -e
@@ -38,7 +46,7 @@ Set-Location -Path "C:\Program Files\Neovim\bin\lua"
 git clone https://github.com/HugoUlm/dotfiles.git
 ren dotfiles hugoulm
 
-Set-Location -Path "C:\Users\wio950\AppData\Local"
+Set-Location -Path "C:\Users\$user\AppData\Local"
 mkdir nvim
 cd ./nvim
 git clone https://github.com/HugoUlm/dotfiles.git
