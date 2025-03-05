@@ -11,7 +11,15 @@ return {
 	end,
 	opts = {
 		lsp = {
-			enable = false,
+			omnisharp = {
+				enable = true,
+				enable_editor_config_support = true,
+				organize_imports = true,
+				enable_analyzers_support = true,
+				enable_import_completion = true,
+				analyze_open_documents_only = false,
+				enable_package_auto_restore = true,
+			},
 		},
 	},
 }

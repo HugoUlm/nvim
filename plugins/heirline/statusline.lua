@@ -41,14 +41,15 @@ local ViMode = {
 		self.mode = vim.api.nvim_get_mode().mode
 	end,
 	provider = function(self)
-		return "  %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
+		--return "  %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
+		return " %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
 	end,
 	hl = function(self)
 		local hls = self.modes[self.mode][3]
 		for _, h in ipairs(hls or {}) do
 			local ok, def = pcall(vim.api.nvim_get_hl, 0, { name = h, link = true })
 			if ok and type(def) == "table" and (def.fg or def.bg or def.link) then
-				return { fg = "black", bg = def.fg, bold = true }
+				return { fg = def.fg, bg = default_bg, bold = true }
 			end
 		end
 	end,
@@ -65,25 +66,20 @@ local ViMode = {
 
 local Git = {
 	init = function(self)
-		-- gitsigns buffer changes
 		self.status_dict = vim.b.gitsigns_status_dict
 		self.has_changes = self.status_dict
 			and (self.status_dict.added ~= 0 or self.status_dict.removed ~= 0 or self.status_dict.changed ~= 0)
 	end,
 	condition = function(self)
-		-- priotize gitsigns, otherwise try vim-fugitive
-		self.head = vim.b.gitsigns_head
-		if not self.head and vim.g.loaded_fugitive == 1 then
-			self.head = vim.fn.FugitiveHead()
-		end
+		self.head = vim.fn.FugitiveHead()
 		return type(self.head) == "string"
 	end,
-	hl = { bg = utils.get_highlight("@variable.parameter").fg },
-	{ -- git branch name
+	hl = { fg = utils.get_highlight("@variable.parameter").fg },
+	{
 		provider = function(self)
 			return "  " .. self.head
 		end,
-		hl = { fg = "black", bold = true },
+		hl = { bg = default_bg, bold = true },
 	},
 	Space,
 	{
@@ -98,7 +94,7 @@ local Git = {
 			local count = self.status_dict and self.status_dict.added or 0
 			return count > 0 and ("+" .. count)
 		end,
-		hl = { fg = "black" },
+		hl = { bg = default_bg },
 	},
 	Space,
 	{
@@ -106,7 +102,7 @@ local Git = {
 			local count = self.status_dict and self.status_dict.removed or 0
 			return count > 0 and ("-" .. count)
 		end,
-		hl = { fg = "black" },
+		hl = { bg = default_bg },
 	},
 	Space,
 	{
@@ -114,7 +110,7 @@ local Git = {
 			local count = self.status_dict and self.status_dict.changed or 0
 			return count > 0 and ("~" .. count)
 		end,
-		hl = { fg = "black" },
+		hl = { bg = default_bg },
 	},
 	{
 		condition = function(self)
@@ -136,15 +132,13 @@ local FileIcon = {
 		return self.icon and (" " .. self.icon .. " ")
 	end,
 	hl = function(self)
-		return { bg = self.icon_color, fg = helper.invertHex(self.icon_color) }
+		return { bg = default_bg, fg = self.icon_color }
 	end,
 }
 
 local FileName = {
-	-- flexible: shorten path if space doesn't allow for full path
 	flexible = 2,
 	init = function(self)
-		-- make relative, see :h filename-modifers
 		self.relname = vim.fn.fnamemodify(self.filename, ":.")
 		local ext = vim.fn.fnamemodify(self.filename, ":e")
 		if self.relname == "" then
@@ -168,7 +162,7 @@ local FileName = {
 		end,
 	},
 	hl = function(self)
-		return { bg = self.color, fg = helper.invertHex(self.color), bold = true }
+		return { bg = default_bg, fg = self.color, bold = true }
 	end,
 }
 
@@ -183,7 +177,7 @@ local FileFlags = {
 		end,
 		provider = "[+] ",
 		hl = function(self)
-			return { bg = self.color }
+			return { fg = self.color }
 		end,
 	},
 	{
@@ -192,11 +186,11 @@ local FileFlags = {
 		end,
 		provider = "   ",
 		hl = function(self)
-			return { bg = self.color }
+			return { fg = self.color }
 		end,
 	},
 	hl = function(self)
-		return { fg = helper.invertHex(self.color) }
+		return { bg = default_bg }
 	end,
 }
 
@@ -209,7 +203,7 @@ local FileNameBlockSpace = {
 		provider = " ",
 	},
 	hl = function(self)
-		return { bg = self.color }
+		return { bg = default_bg }
 	end,
 }
 
@@ -222,7 +216,7 @@ local FileNameBlock = {
 	FileName,
 	FileNameBlockSpace,
 	FileFlags,
-	{ provider = "%<" }, -- cut here when there's not enough space
+	--{ provider = "%<" },
 }
 
 local FileType = {
@@ -236,19 +230,14 @@ local Ruler = {
 	-- %L = number of lines in the buffer
 	-- %c = column number
 	provider = "[%7(%l/%3L%):%2c]",
-	hl = { fg = utils.get_highlight("String").fg, bold = true },
+	hl = { fg = utils.get_highlight("Violet").fg, bold = true },
 }
 
 local Diagnostics = {
-	-- Since this is nested inside LSPActive the events aren't called
 	static = {
-		-- error_icon = vim.fn.sign_getdefined("DiagnosticSignError")[1].text,
-		-- warn_icon = vim.fn.sign_getdefined("DiagnosticSignWarn")[1].text,
-		-- info_icon = vim.fn.sign_getdefined("DiagnosticSignInfo")[1].text,
-		-- hint_icon = vim.fn.sign_getdefined("DiagnosticSignHint")[1].text,
-		error_icon = " ",
-		warn_icon = " ",
-		info_icon = " ",
+		error_icon = " ",
+		warn_icon = "",
+		info_icon = "",
 		hint_icon = "",
 	},
 	init = function(self)
@@ -297,7 +286,7 @@ local LSPActive = {
 		self.clients = require("hugoulm.utils").lsp_get_clients({ bufnr = 0 })
 		return next(self.clients) ~= nil
 	end,
-	hl = { fg = utils.get_highlight("String").fg, bold = true },
+	hl = { fg = utils.get_highlight("NightflyViolet").fg, bold = true },
 	{
 		provider = function(self)
 			local names = {}
