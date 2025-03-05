@@ -1,6 +1,7 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.g.have_nerd_font = true
+vim.g.editorconfig = true
 
 require("hugoulm.schedules.ruler")
 require("hugoulm.schedules.clipboard")
@@ -12,6 +13,26 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
 	callback = function()
 		vim.highlight.on_yank()
+	end,
+})
+
+-- Listen to LSP Attach
+vim.api.nvim_create_autocmd("LspAttach", {
+	callback = function(args)
+		local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+		vim.api.nvim_create_autocmd("BufWritePre", {
+			group = augroup,
+			buffer = args.buf,
+			callback = function()
+				-- Format the code before you run fix usings
+				vim.lsp.buf.format({ timeout = 1000, async = false })
+
+				-- If the file is C# then run fix usings
+				if vim.bo[0].filetype == "cs" then
+					require("csharp").fix_usings()
+				end
+			end,
+		})
 	end,
 })
 
@@ -50,6 +71,11 @@ require("lazy").setup({
 	require("hugoulm.plugins.treesitter"),
 	require("hugoulm.plugins.which-key"),
 	require("hugoulm.plugins.icons"),
+	--require("hugoulm.plugins.csharp"),
+	--require("hugoulm.plugins.boilersharp").setup(),
+  --require("hugoulm.plugins.lightbuld").setup({
+    --autocmd = { enabled = true }
+  --})
 }, {
 	ui = {
 		icons = vim.g.have_nerd_font and {} or {
