@@ -6,6 +6,6 @@ return {
 	},
 	event = "LspAttach",
 	config = function()
-		require("hugoulm.plugins.tiny-code-action").setup()
+		require("tiny-code-action").setup()
 	end,
 }
