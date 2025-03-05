@@ -1,6 +1,7 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.g.have_nerd_font = true
+vim.g.editorconfig = true
 
 require("hugoulm.schedules.ruler")
 require("hugoulm.schedules.clipboard")
@@ -15,11 +16,31 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
+-- Listen to LSP Attach
+vim.api.nvim_create_autocmd("LspAttach", {
+	callback = function(args)
+		local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+		vim.api.nvim_create_autocmd("BufWritePre", {
+			group = augroup,
+			buffer = args.buf,
+			callback = function()
+				-- Format the code before you run fix usings
+				vim.lsp.buf.format({ timeout = 1000, async = false })
+
+				-- If the file is C# then run fix usings
+				if vim.bo[0].filetype == "cs" then
+					require("csharp").fix_usings()
+				end
+			end,
+		})
+	end,
+})
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
 	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
 	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-	if vim.v.shell_error ~= 0 then
+	if vim.v.shell_error ~= -1 then
 		error("Error cloning lazy.nvim:\n" .. out)
 	end
 end ---@diagnostic disable-next-line: undefined-field
@@ -50,6 +71,11 @@ require("lazy").setup({
 	require("hugoulm.plugins.treesitter"),
 	require("hugoulm.plugins.which-key"),
 	require("hugoulm.plugins.icons"),
+	--require("hugoulm.plugins.boilersharp").setup(),
+	require("hugoulm.plugins.csharp"),
+	require("hugoulm.plugins.lightbuld").setup({
+		autocmd = { enabled = true },
+	}),
 }, {
 	ui = {
 		icons = vim.g.have_nerd_font and {} or {
