@@ -10,11 +10,6 @@ return {
 		"hrsh7th/cmp-nvim-lsp",
 	},
 	config = function()
-		require("mason").setup()
-		require("mason-lspconfig").setup({
-			ensure_installed = { "omnisharp" },
-			automatic_installation = true,
-		})
 		vim.api.nvim_create_autocmd("LspAttach", {
 			group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 			callback = function(event)
@@ -39,7 +34,7 @@ return {
 
 				map("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
 
-				map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction", { "n", "x" })
+				-- map("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction", { "n", "x" })
 
 				map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
 
