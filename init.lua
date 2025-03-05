@@ -76,7 +76,7 @@ require("lazy").setup({
   require("hugoulm.plugins.lightbuld").setup({
     autocmd = { enabled = true },
   }),
-  require("hugoulm.plugins.tiny-code-action"),
+  require("hugoulm.plugins.tiny-code-action").setup(),
 }, {
   ui = {
     icons = vim.g.have_nerd_font and {} or {
