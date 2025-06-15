@@ -3,12 +3,20 @@ vim.g.maplocalleader = " "
 vim.g.have_nerd_font = true
 vim.g.editorconfig = true
 
+local config_path = vim.fn.stdpath("config")
+package.path = package.path .. ";" .. config_path .. "/?.lua" .. ";" .. config_path .. "/?/init.lua"
+
 require("hugoulm.schedules.ruler")
 require("hugoulm.schedules.clipboard")
 require("hugoulm.maps.remap")
 require("hugoulm.maps.options")
 
 vim.api.nvim_create_autocmd("TextYankPost", {
+  desc = "Highlight when yanking (copying) text",
+  group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
   desc = "Highlight when yanking (copying) text",
   group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
   callback = function()
@@ -73,9 +81,9 @@ require("lazy").setup({
   require("hugoulm.plugins.icons"),
   --require("hugoulm.plugins.boilersharp").setup(),
   require("hugoulm.plugins.csharp"),
-  require("hugoulm.plugins.lightbuld").setup({
-    autocmd = { enabled = true },
-  }),
+  --require("hugoulm.plugins.lightbulb").setup({
+  --autocmd = { enabled = true },
+  --}),
   require("hugoulm.plugins.tiny-code-action"),
 }, {
   ui = {
