@@ -33,7 +33,7 @@ cd ~/.config/
 git clone https://github.com/HugoUlm/ghostty.git
 
 echo "adding oh-my-posh config"
-echo "eval /"$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/easy-term.omp.json)/"" >> ~/.zshrc
+echo "eval \"$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/easy-term.omp.json)\"" >> ~/.zshrc
 
 echo "adding git aliases"
 git config --global alias.co checkout
