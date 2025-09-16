@@ -41,8 +41,7 @@ vim.keymap.set("x", "<leader>s", [[:s/\(\w.*\)/]], { desc = "Replace selected li
 vim.keymap.set("n", "<C-f>", [[/\<<C-r><C-w>\><CR>]], { desc = "Search current word in file" })
 
 local function safe_code_action()
-	local actions = require("hugoulm.plugins.tiny-code-action").code_action()
-	print(actions[1])
+	local actions = require("tiny-code-action").code_action()
 	if actions then
 		actions()
 	else

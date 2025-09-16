@@ -5,7 +5,5 @@ return {
 		{ "nvim-telescope/telescope.nvim" },
 	},
 	event = "LspAttach",
-	config = function()
-		require("tiny-code-action").setup()
-	end,
+	opts = {},
 }
