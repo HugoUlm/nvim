@@ -52,3 +52,7 @@ end
 vim.keymap.set("n", "<leader>ca", function()
 	safe_code_action()
 end, { desc = "[C]ode [A]ction", noremap = true, silent = true })
+
+vim.keymap.set('n', 'K', function()
+	vim.diagnostic.open_float()
+end, { desc = 'Diagnostic float' })
