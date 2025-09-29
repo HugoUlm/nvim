@@ -12,10 +12,10 @@ return {
       vim.keymap.set('i', lhs, rhs, { expr = true, replace_keycodes = false, silent = true })
     end
 
-    map('<M-y>', 'copilot#Accept("<CR>")')  -- accept all
-    map('<M-n>', 'copilot#Next()')          -- next suggestion
-    map('<M-p>', 'copilot#Previous()')      -- previous suggestion
-    map('<M-d>', 'copilot#Dismiss()')       -- dismiss
-    map('<M-Y>', 'copilot#AcceptWord()')    -- accept word
+    map('<C-y>', 'copilot#Accept("<CR>")') -- accept all
+    map('<C-n>', 'copilot#Next()')         -- next suggestion
+    map('<C-p>', 'copilot#Previous()')     -- previous suggestion
+    map('<C-d>', 'copilot#Dismiss()')      -- dismiss
+    map('<C-Y>', 'copilot#AcceptWord()')   -- accept word
   end,
 }
