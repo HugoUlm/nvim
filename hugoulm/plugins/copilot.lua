@@ -17,5 +17,6 @@ return {
     map('<C-p>', 'copilot#Previous()')     -- previous suggestion
     map('<C-d>', 'copilot#Dismiss()')      -- dismiss
     map('<C-Y>', 'copilot#AcceptWord()')   -- accept word
+    map('<C-e>', 'copilot#Suggest()')      -- trigger suggestion
   end,
 }
