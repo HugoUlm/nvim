@@ -153,7 +153,7 @@ return {
             yaml = {
               schemaStore = { enable = true },
               validate = true,
-              format = { enable = true },
+              format = { enable = false },
               hover = true,
               completion = true,
             },
@@ -195,7 +195,7 @@ return {
       vim.list_extend(ensure_installed, {
         'stylua',       -- Lua formatter
         'markdownlint', -- Markdown linter
-        'yamllint',     -- YAML linter
+        --'yamllint',     -- YAML linter
         'jsonlint',     -- JSON linter
         'ruff',         -- Python linter/formatter via LSP
       })
