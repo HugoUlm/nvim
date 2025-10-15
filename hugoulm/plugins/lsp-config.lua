@@ -189,6 +189,22 @@ return {
         },
 
         marksman = {},
+
+        gopls = {
+          settings = {
+            gopls = {
+              hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                compositeLiteralTypes = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+              },
+            },
+          },
+        },
       }
 
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -198,6 +214,7 @@ return {
         --'yamllint',     -- YAML linter
         'jsonlint',     -- JSON linter
         'ruff',         -- Python linter/formatter via LSP
+        'gopls',        -- Go LSP
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
