@@ -1,67 +1,54 @@
 local utils = require("heirline.utils")
 local conditions = require("heirline.conditions")
-local helper = require("hugoulm.plugins.heirline.helper")
+local my_utils = require("hugoulm.plugins.heirline.utils")
+
+local function map_to_names(client_list)
+	return vim.tbl_map(function(client) return client.name end, client_list)
+end
 
 local Space = { provider = " " }
 local Align = { provider = "%=" }
 
 local default_bg = "#252d39"
 
-local ViMode = {
+local Mode = {
 	static = {
 		modes = {
-			n = { "Normal", "N", { "ErrorMsg" } },
-			niI = { "Normal", "N" },
-			niR = { "Normal", "N" },
-			niV = { "Normal", "N" },
-			no = { "N·OpPd", "?" },
-			v = { "Visual", "V", { "Directory" } },
-			V = { "V·Line", "Vl", { "Directory" } },
-			[""] = { "V·Blck", "Vb", { "Directory" } },
-			s = { "Select", "S", { "Search" } },
-			S = { "S·Line", "Sl", { "Search" } },
-			[""] = { "S·Block", "Sb", { "Search" } },
-			i = { "Insert", "I", { "String" } },
-			ic = { "ICompl", "Ic", { "ErrorMsg" } },
-			R = { "Rplace", "R", { "WarningMsg", "IncSearch" } },
-			Rv = { "VRplce", "Rv", { "WarningMsg", "IncSearch" } },
-			c = { "Command", "C", { "Keyword" } },
-			cv = { "Vim Ex", "E" },
-			ce = { "Ex (r)", "E" },
-			r = { "Prompt", "P" },
-			rm = { "More  ", "M" },
-			["r?"] = { "Cnfirm", "Cn" },
-			["!"] = { "Shell ", "S", { "DiffAdd", "diffAdded" } },
-			nt = { "Term  ", "T", { "Visual" } },
-			t = { "Term  ", "T", { "Visual" } },
-			-- t      = { "Term  ", "T", { "DiffAdd", "diffAdded" } },
+			n = { "NORMAL", "ErrorMsg" },
+			no = { "NORMAL?", "ModeOperator" },
+			v = { "VISUAL", "ModeVisual" },
+			V = { "VISUAL-L", "ModeVisual" },
+			[""] = { "VISUAL-B", "ModeVisual" },
+			s = { "SELECT", "ModeVisual" },
+			S = { "SELECT-L", "ModeVisual" },
+			[""] = { "SELECT-B", "ModeVisual" },
+			i = { "INSERT", "WarningMsg" },
+			R = { "REPLACE", "ModeReplace" },
+			c = { "COMMAND", "ModeCommand" },
+			["!"] = { "SHELL", "ModeCommand" },
+			r = { "PROMPT", "ModePrompt" },
+			t = { "TERMINAL", "ModeTerminal" },
 		},
 	},
 	init = function(self)
-		self.mode = vim.api.nvim_get_mode().mode
+		local short_mode = vim.fn.mode(1) or "n"
+		local mode = self.modes[short_mode:sub(1, 2)] or self.modes[short_mode:sub(1, 1)] or
+		    { "UNKNOWN", "ModeNormal" }
+		local hl = my_utils.hl(mode[2])
+
+		self[1] = self:new(
+			my_utils.build_pill(
+				{},
+				{ provider = " ", hl = { fg = my_utils.palette().base, bg = hl.fg } },
+				{ { provider = " " .. mode[1], hl = hl } },
+				"provider"
+			),
+			1
+		)
 	end,
-	provider = function(self)
-		--return "  %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
-		return " %2(" .. string.upper(self.modes[self.mode][1]) .. " %)"
-	end,
-	hl = function(self)
-		local hls = self.modes[self.mode][3]
-		for _, h in ipairs(hls or {}) do
-			local ok, def = pcall(vim.api.nvim_get_hl, 0, { name = h, link = true })
-			if ok and type(def) == "table" and (def.fg or def.bg or def.link) then
-				return { fg = def.fg, bg = default_bg, bold = true }
-			end
-		end
-	end,
-	-- Re-evaluate the component only on ModeChanged event!
-	-- Also allows the statusline to be re-evaluated when entering operator-pending mode
-	update = {
-		"ModeChanged",
-		pattern = "*:*",
-		callback = vim.schedule_wrap(function()
-			vim.cmd("redrawstatus")
-		end),
-	},
+	update = { "ModeChanged" },
+	provider = " ",
+	hl = { bold = true },
 }
 
 local Git = {
@@ -69,71 +56,20 @@ local Git = {
 		self.status_dict = vim.b.gitsigns_status_dict
 		self.has_changes = self.status_dict
 		    and (self.status_dict.added ~= 0 or self.status_dict.removed ~= 0 or self.status_dict.changed ~= 0)
+
+		self[1] = self:new(
+			my_utils.build_pill(
+				{},
+				{ provider = vim.fn.nr2char(0xF09B) .. " ", hl = { fg = my_utils.palette().base, bg = utils.get_highlight("@variable.parameter").fg } },
+				{ { provider = " " .. self.head, hl = { fg = utils.get_highlight("@variable.parameter").fg, bg = my_utils.darken(utils.get_highlight("@variable.parameter").fg, 0.3) } } },
+				"provider"
+			),
+			1
+		)
 	end,
 	condition = function(self)
 		self.head = vim.fn.FugitiveHead()
 		return type(self.head) == "string"
-	end,
-	hl = { fg = utils.get_highlight("@variable.parameter").fg },
-	{
-		provider = function(self)
-			return "  " .. self.head
-		end,
-		hl = { bg = default_bg, bold = true },
-	},
-	Space,
-	{
-		condition = function(self)
-			return self.has_changes
-		end,
-		provider = "(",
-		hl = { bold = true },
-	},
-	{
-		provider = function(self)
-			local count = self.status_dict and self.status_dict.added or 0
-			return count > 0 and ("+" .. count)
-		end,
-		hl = { bg = default_bg },
-	},
-	Space,
-	{
-		provider = function(self)
-			local count = self.status_dict and self.status_dict.removed or 0
-			return count > 0 and ("-" .. count)
-		end,
-		hl = { bg = default_bg },
-	},
-	Space,
-	{
-		provider = function(self)
-			local count = self.status_dict and self.status_dict.changed or 0
-			return count > 0 and ("~" .. count)
-		end,
-		hl = { bg = default_bg },
-	},
-	{
-		condition = function(self)
-			return self.has_changes
-		end,
-		provider = ")",
-		hl = { bold = true },
-	},
-	Space,
-}
-
-local FileIcon = {
-	init = function(self)
-		local filename = self.filename
-		local ext = vim.fn.fnamemodify(filename, ":e")
-		self.icon, self.icon_color = require("nvim-web-devicons").get_icon_color(filename, ext,
-			{ default = true })
-	end,
-	provider = function(self)
-		return self.icon and (" " .. self.icon .. " ")
-	end,
-	hl = function(self)
-		return { bg = default_bg, fg = self.icon_color }
 	end,
 }
 
@@ -168,74 +104,45 @@ local FileName = {
 	end,
 }
 
-local FileFlags = {
-	init = function(self)
-		local ext = vim.fn.fnamemodify(self.filename, ":e")
-		self.icon, self.color = require("nvim-web-devicons").get_icon_color(self.filename, ext,
-			{ default = true })
-	end,
-	{
-		condition = function()
-			return vim.bo.modified
-		end,
-		provider = "[+] ",
-		hl = function(self)
-			return { fg = self.color }
-		end,
-	},
-	{
-		condition = function()
-			return not vim.bo.modifiable or vim.bo.readonly
-		end,
-		provider = "   ",
-		hl = function(self)
-			return { fg = self.color }
-		end,
-	},
-	hl = function(self)
-		return { bg = default_bg }
-	end,
-}
 
-local FileNameBlockSpace = {
-	init = function(self)
-		local ext = vim.fn.fnamemodify(self.filename, ":e")
-		self.icon, self.color = require("nvim-web-devicons").get_icon_color(self.filename, ext,
-			{ default = true })
-	end,
-	{
-		provider = " ",
-	},
-	hl = function(self)
-		return { bg = default_bg }
-	end,
-}
+local get_filename = function()
+	local full_path = vim.api.nvim_buf_get_name(0)
+	local home = vim.fn.expand("~")
+	local short_path = full_path:gsub("^" .. vim.pesc(home), "~")
+
+	-- Split the path into parts
+	local parts = {}
+	for part in short_path:gmatch("[^/]+") do
+		table.insert(parts, part)
+	end
+
+	-- Get the last 3 parts (2 folders + filename)
+	local start_index = math.max(#parts - 2, 1)
+	local last_parts = {}
+	for i = start_index, #parts do
+		table.insert(last_parts, parts[i])
+	end
+
+	return "~/" .. table.concat(last_parts, "/")
+end
 
 local FileNameBlock = {
 	update = { "BufEnter", "DirChanged", "BufModifiedSet", "VimResized" },
 	init = function(self)
+		local short_path = get_filename()
 		self.filename = vim.api.nvim_buf_get_name(0)
-	end,
-	FileIcon,
-	FileName,
-	FileNameBlockSpace,
-	FileFlags,
-	--{ provider = "%<" },
-}
+		local ext = vim.fn.fnamemodify(self.filename, ":e")
 
-local FileType = {
-	provider = function()
-		return "[" .. vim.bo.filetype .. "]"
+		self[1] = self:new(
+			my_utils.build_icon_pill(
+				short_path,
+				ext
+			),
+			1
+		)
 	end,
 }
 
-local Ruler = {
-	-- %l = current line number
-	-- %L = number of lines in the buffer
-	-- %c = column number
-	provider = "[%7(%l/%3L%):%2c]",
-	hl = { fg = utils.get_highlight("Violet").fg, bold = true },
-}
 
 local Diagnostics = {
 	static = {
@@ -277,41 +184,69 @@ local Diagnostics = {
 	},
 }
 
-local LSPActive = {
-	-- Update on "DiagnosticChanged" as nested update clause is ignored
-	update = {
-		"LspAttach",
-		"LspDetach",
-		callback = vim.schedule_wrap(function(_)
-			vim.cmd.redrawstatus()
-		end),
-	},
+
+local LSP = {
 	condition = function(self)
-		self.clients = require("hugoulm.utils.init").lsp_get_clients({ bufnr = 0 })
-		return next(self.clients) ~= nil
+		self.active_clients = vim.lsp.get_clients()
+		return not vim.tbl_isempty(self.active_clients)
 	end,
-	hl = { fg = utils.get_highlight("NightflyViolet").fg, bold = true },
-	{
-		provider = function(self)
-			local names = {}
-			for _, server in pairs(self.clients) do
-				table.insert(names, server.name)
+
+	update = { "LspAttach", "LspDetach", "BufEnter", "DiagnosticChanged" },
+
+	init = function(self)
+		local servers = {}
+		local active_clients = map_to_names(self.active_clients)
+		local buffer_clients = map_to_names(vim.lsp.get_clients { bufnr = vim.api.nvim_get_current_buf() })
+		local counted_clients = {}
+
+		for _, client in ipairs(active_clients) do
+			counted_clients[client] = (counted_clients[client] or 0) + 1
+		end
+
+		for client, count in pairs(counted_clients) do
+			local text = client
+			if count > 1 then
+				text = text .. " ×" .. count
 			end
-			return "[ " .. table.concat(names, " ") .. "]"
-		end,
-	},
+			text = text .. " "
+
+			table.insert(servers, {
+				provider = text,
+				hl = vim.tbl_contains(buffer_clients, client) and
+				    my_utils.hl_override().CustomTablineLspActive
+				    or my_utils.hl_override().CustomTablineLspInactive,
+				lite = true,
+			})
+		end
+
+		table.insert(servers, {
+			provider = "%7(%l/%3L%):%2c ",
+			hl = my_utils.hl_override().CustomTablineLspActive,
+			lite = true,
+		})
+
+		self[1] = self:new(
+			my_utils.build_pill(servers,
+				{ provider = vim.fn.nr2char(0xF085) .. " ", hl = my_utils.hl_override().CustomTablineLsp, lite = true },
+				{ provider = " ", hl = my_utils.hl_override().CustomTablineLsp, lite = true },
+				"provider"
+			),
+			1
+		)
+		self[2] = self:new({ provider = " " }, 2)
+	end,
 }
 
 local DefaultStatusLine = {
-	ViMode,
-	FileNameBlock,
-	Git,
-	Align,
+	Mode,
 	Space,
+	Git,
+	Space,
+	FileNameBlock,
+	Align,
 	Diagnostics,
 	Space,
-	LSPActive,
-	Ruler,
+	LSP,
 	hl = { bg = default_bg, bold = true },
 }
 
@@ -327,30 +262,6 @@ local InactiveStatusline = {
 	Align,
 }
 
-local HelpFileName = {
-	condition = function()
-		return vim.bo.filetype == "help"
-	end,
-	provider = function()
-		local filename = vim.api.nvim_buf_get_name(0)
-		return vim.fn.fnamemodify(filename, ":t")
-	end,
-}
-
-local SpecialStatusline = {
-	condition = function()
-		return conditions.buffer_matches({
-			buftype = { "nofile", "prompt", "help", "quickfix" },
-			filetype = { "fzf", "^git.*", "fugitive", "fugitiveblame" },
-		})
-	end,
-	Align,
-	FileType,
-	Space,
-	HelpFileName,
-	Align,
-}
-
 local TerminalName = {
 	provider = function()
 		local tname, _ = vim.api.nvim_buf_get_name(0):gsub(".*:", "")
@@ -363,7 +274,7 @@ local TerminalStatusline = {
 	condition = function()
 		return conditions.buffer_matches({ buftype = { "terminal" } })
 	end,
-	{ condition = conditions.is_active, ViMode, Space },
+	{ condition = conditions.is_active, Mode, Space },
 	Align,
 	TerminalName,
 	Align,
@@ -378,7 +289,6 @@ return {
 		end
 	end,
 	fallthrough = false,
-	SpecialStatusline,
 	TerminalStatusline,
 	InactiveStatusline,
 	DefaultStatusLine,

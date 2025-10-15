@@ -10,7 +10,16 @@ local M = {}
 
 function M.lsp_get_clients(...)
 	---@diagnostic disable-next-line: deprecated
-	return M.__HAS_NVIM_011 and vim.lsp.get_clients(...) or vim.lsp.get_active_clients(...)
+	local clients = vim.lsp.get_active_clients(...)
+	local filtered = {}
+
+	for _, client in ipairs(clients) do
+		if client.name ~= "GitHub Copilot" then
+			table.insert(filtered, client)
+		end
+	end
+	return filtered
+	--return M.__HAS_NVIM_011 and vim.lsp.get_clients(...) or vim.lsp.get_active_clients(...)
 end
 
 return M

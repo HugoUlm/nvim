@@ -1,5 +1,12 @@
 {
     "diagnostics.disable": [
         "missing-fields"
+    ],
+    "diagnostics.globals": [
+        "bg",
+        "build_pill",
+        "hl_override",
+        "darken_color",
+        "brighten_color"
     ]
 }

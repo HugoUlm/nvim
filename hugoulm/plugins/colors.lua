@@ -1,64 +1,41 @@
-function ColorMyPencils(color)
-	color = color or "rose-pine-moon"
-	vim.cmd.colorscheme(color)
-
-	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-end
+local utils = require("hugoulm.plugins.heirline.utils")
 
 return {
-	{
-		"rose-pine/neovim",
-		name = "rose-pine",
-		priority = 1000,
-		config = function()
-			require("rose-pine").setup({
-				variant = "moon", -- Options: 'auto', 'main', 'moon', 'dawn'
-				dark_variant = "moon", -- Options: 'main', 'moon', 'dawn'
-				dim_inactive_windows = false,
-				extend_background_behind_borders = false,
-				enable = {
-					terminal = true,
-					legacy_highlights = false,
-					migrations = false,
-				},
-				styles = {
-					bold = true,
-					italics = false,
-					transparency = true,
-				},
-				groups = {
-					border = "muted",
-					link = "iris",
-					panel = "surface",
-
-					error = "love",
-					hint = "iris",
-					info = "foam",
-					note = "pine",
-					todo = "rose",
-					warn = "gold",
-
-					git_add = "foam",
-					git_change = "rose",
-					git_delete = "love",
-					git_dirty = "rose",
-					git_ignore = "muted",
-					git_merge = "iris",
-					git_rename = "pine",
-					git_stage = "iris",
-					git_text = "rose",
-					git_untracked = "subtle",
-
-					h1 = "iris",
-					h2 = "foam",
-					h3 = "rose",
-					h4 = "gold",
-					h5 = "pine",
-					h6 = "foam",
-				},
-			})
-			ColorMyPencils()
-		end,
+	"catppuccin/nvim",
+	name = "catppuccin",
+	lazy = false,
+	priority = 10000,
+	opts = {
+		flavour = "mocha",
+		term_colors = true,
+		integrations = {
+			blink_cmp = true,
+			neotest = true,
+			noice = true,
+			diffview = true,
+			gitsigns = true,
+			snacks = { enabled = true },
+			lsp_trouble = true,
+			which_key = true,
+		},
+		lsp_styles = {
+			underlines = {
+				errors = { "undercurl" },
+				hints = { "undercurl" },
+				warnings = { "undercurl" },
+				information = { "undercurl" },
+				ok = { "underline" },
+			},
+		},
+		compile = {
+			enabled = true,
+		},
+		highlight_overrides = {
+			all = utils.hl_override
+		},
 	},
+	config = function(_, opts)
+		require("catppuccin").setup(opts)
+		vim.cmd.colorscheme("catppuccin")
+	end,
 }

@@ -68,6 +68,7 @@ require("lazy").setup({
   require("hugoulm.plugins.which-key"),
   require("hugoulm.plugins.icons"),
   require("hugoulm.plugins.tiny-code-action"),
+  require("hugoulm.plugins.snacks"),
 }, {
   ui = {
     icons = vim.g.have_nerd_font and {} or {
