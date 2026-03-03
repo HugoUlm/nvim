@@ -9,7 +9,7 @@ end
 local Space = { provider = " " }
 local Align = { provider = "%=" }
 
-local default_bg = "#252d39"
+local default_bg = my_utils.palette().mantle
 
 local Mode = {
 	static = {

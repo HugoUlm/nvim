@@ -26,6 +26,8 @@ local p = {
   diff_text  = "#2a3e50",
 }
 
+M.palette = p
+
 function M.apply()
   local hl = vim.api.nvim_set_hl
 

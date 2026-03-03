@@ -8,7 +8,31 @@ local separators = {
 ---@alias MyColor string
 
 ---@return table<string, MyColor>
-local function palette() return require("catppuccin.palettes").get_palette() end
+local function palette()
+	local p = require("hugoulm.theme.prompt").palette
+	return {
+		base     = p.bg,
+		mantle   = p.bg_dark,
+		crust    = p.bg_dark,
+		surface0 = p.bg_float,
+		surface1 = p.bg_visual,
+		surface2 = p.fg_gutter,
+		overlay0 = p.comment,
+		text     = p.fg,
+		subtext1 = p.fg_dark,
+		lavender = p.purple,
+		mauve    = p.purple,
+		pink     = p.purple,
+		peach    = p.yellow,
+		yellow   = p.yellow,
+		sky      = p.blue,
+		sapphire = p.blue,
+		blue     = p.blue,
+		teal     = p.teal,
+		green    = p.green,
+		red      = p.red,
+	}
+end
 
 local function expand_style(tbl)
 	if tbl.style then
@@ -311,7 +335,7 @@ function build_pill(left, center, right, key, opts)
 		end
 	end
 
-	local default_bg = "#252d39"
+	local default_bg = palette().mantle
 
 	result:insert { [key] = separators.left, hl = { fg = bg(center.hl or center[1].hl), bg = bg(default_bg) } }
 	result:insert(center)
