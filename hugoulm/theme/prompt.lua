@@ -5,7 +5,7 @@ local p = require("hugoulm.theme.palette")
 function M.apply()
   local hl = vim.api.nvim_set_hl
 
-  hl(0, "Normal",            { fg = p.fg,       bg = p.bg })
+  hl(0, "Normal",            { fg = p.fg,       bg = p.bg_dark })
   hl(0, "NormalFloat",       { fg = p.fg,       bg = p.bg_float })
   hl(0, "NormalNC",          { fg = p.fg_dark,  bg = p.bg_dark })
   hl(0, "Comment",           { fg = p.comment,  italic = true })

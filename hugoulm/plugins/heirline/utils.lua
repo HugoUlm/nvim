@@ -360,7 +360,7 @@ function build_pill(left, center, right, key, opts)
 		end
 	end
 
-	local default_bg = "#252d39"
+	local default_bg = palette().mantle
 
 	result:insert { [key] = separators.left, hl = { fg = bg(center.hl or center[1].hl), bg = bg(default_bg) } }
 	result:insert(center)
