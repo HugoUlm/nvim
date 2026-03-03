@@ -1,32 +1,6 @@
 local M = {}
 
-local p = {
-  bg         = "#1a1a2e",
-  bg_dark    = "#141420",
-  bg_float   = "#1e1e32",
-  bg_visual  = "#2a2040",
-  bg_search  = "#2d2550",
-  fg         = "#ffffff",
-  fg_dark    = "#c8c8d8",
-  fg_gutter  = "#4a4a6a",
-  none       = "NONE",
-
-  purple     = "#C591E8",
-  green      = "#69FF94",
-  green_dark = "#66F68F",
-  teal       = "#56B6C2",
-  blue       = "#5FAAE8",
-  red        = "#D0666F",
-  yellow     = "#DCB977",
-  comment    = "#6a6a8a",
-
-  diff_add   = "#1e3a28",
-  diff_del   = "#3a1e22",
-  diff_change= "#1e2e3a",
-  diff_text  = "#2a3e50",
-}
-
-M.palette = p
+local p = require("hugoulm.theme.palette")
 
 function M.apply()
   local hl = vim.api.nvim_set_hl
