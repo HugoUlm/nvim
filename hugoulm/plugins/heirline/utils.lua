@@ -1,39 +1,14 @@
 local separators = {
-	left = "",
-	left_lite = "",
-	right = "",
-	right_lite = "",
+	left = "",
+	left_lite = "",
+	right = "",
+	right_lite = "",
 }
 
 ---@alias MyColor string
 
-local _p = {
-	base       = "#1a1a2e",
-	mantle     = "#141420",
-	surface0   = "#1e1e32",
-	surface1   = "#2a2040",
-	surface2   = "#3a3a5a",
-	overlay0   = "#4a4a6a",
-	text       = "#ffffff",
-	subtext    = "#c8c8d8",
-	purple     = "#C591E8",
-	green      = "#69FF94",
-	green_dark = "#66F68F",
-	teal       = "#56B6C2",
-	blue       = "#5FAAE8",
-	red        = "#D0666F",
-	yellow     = "#DCB977",
-	peach      = "#DCB977",
-	pink       = "#C591E8",
-	mauve      = "#C591E8",
-	sapphire   = "#5FAAE8",
-	sky        = "#56B6C2",
-	lavender   = "#8888cc",
-	crust      = "#0e0e1e",
-}
-
 ---@return table<string, MyColor>
-local function palette() return _p end
+local function palette() return require("catppuccin.palettes").get_palette() end
 
 local function expand_style(tbl)
 	if tbl.style then
@@ -43,45 +18,6 @@ local function expand_style(tbl)
 		tbl.style = nil
 	end
 	return tbl
-end
-
-local function format_color(color)
-	if type(color) == "number" then
-		return string.format("#%06x", color)
-	end
-	return color
-end
-
-local function hex_to_rgb(hex)
-	helper = hex:gsub("#", "")
-	return tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5, 6), 16)
-end
-
-local function rgb_to_hex(r, g, b)
-	return string.format("#%02x%02x%02x", math.floor(r + 0.5), math.floor(g + 0.5), math.floor(b + 0.5))
-end
-
-local function blend_hex(fg, bg, alpha)
-	fg = format_color(fg) or "#ffffff"
-	bg = format_color(bg) or "#000000"
-	local fr, fg_, fb = hex_to_rgb(fg)
-	local br, bg_, bb = hex_to_rgb(bg)
-	if not fr or not br then return fg end
-	return rgb_to_hex(
-		fr * alpha + br * (1 - alpha),
-		fg_ * alpha + bg_ * (1 - alpha),
-		fb * alpha + bb * (1 - alpha)
-	)
-end
-
-function darken_color(color, alpha, bg)
-	bg = bg or palette().base
-	return blend_hex(format_color(color), format_color(bg), alpha)
-end
-
-function brighten_color(color, alpha, bg)
-	bg = bg or palette().text
-	return blend_hex(format_color(color), format_color(bg), alpha)
 end
 
 function hl_override()
@@ -219,19 +155,39 @@ function hl_override()
 
 		LazyCommitTypeFeat = { sp = palette().blue, style = { "underline" } },
 
+		-- Syntax
+		-- ["@variable.parameter"] = { fg = palette().text, style = { "nocombine" } },
+		-- ["@module"] = { fg = palette().pink, style = { "nocombine" } },
+		-- ["@number"] = { fg = palette().peach },
+		-- ["@boolean"] = { fg = palette().green, style = { "bold" } },
+		-- ["@type.qualifier"] = { fg = palette().mauve, style = { "bold" } },
+		-- ["@function.macro"] = { fg = palette().blue },
+		-- ["@constant.builtin"] = { fg = palette().green },
 		["@property"] = { fg = brighten_color(palette().yellow, 0.5) },
 		["@variable.member"] = { fg = brighten_color(palette().yellow, 0.5) },
 
+		-- ["@lsp.type.struct"] = { fg = palette().yellow },
 		["@lsp.type.property"] = { fg = brighten_color(palette().yellow, 0.5) },
 		["@lsp.type.interface"] = { fg = palette().peach },
 		["@lsp.type.builtinType"] = { fg = palette().yellow, style = { "bold" } },
 		["@lsp.type.enum"] = { fg = palette().teal },
+		-- ["@lsp.type.enumMember"] = { fg = palette().green },
+		-- ["@lsp.type.variable"] = { fg = palette().text },
+		-- ["@lsp.type.parameter"] = { fg = palette().text },
 		["@lsp.type.namespace"] = { fg = palette().pink },
+		-- ["@lsp.type.number"] = { fg = palette().green },
+		-- ["@lsp.type.boolean"] = { fg = palette().green, style = { "bold" } },
 		["@lsp.type.unresolvedReference"] = { sp = palette().surface2, style = { "undercurl" } },
 		["@lsp.type.derive.rust"] = { link = "@lsp.type.interface" },
+		--
 		["@lsp.mod.reference"] = { style = { "italic" } },
 		["@lsp.mod.mutable"] = { style = { "bold" } },
 		["@lsp.mod.trait"] = { fg = palette().sapphire },
+		-- ["@lsp.typemod.variable.static"] = { style = { "underdashed" } },
+		-- ["@lsp.typemod.method.defaultLibrary"] = {},
+		-- ["@lsp.typemod.variable.callable"] = { fg = palette().teal },
+		--
+		-- ["@lsp.typemod.property.withAttribute.nix"] = { style = { "italic" } },
 	}
 
 	for group, attrs in pairs(highlights) do
@@ -247,6 +203,24 @@ local function fmt(color)
 	elseif type(color) == "number" then
 		return string.format("#%06x", color)
 	end
+end
+
+local function format_color(color)
+	if type(color) == "number" then
+		return string.format("#%06x", color)
+	end
+
+	return color
+end
+
+function darken_color(color, alpha, bg)
+	bg = bg or palette().base
+	return require("snacks").util.blend(format_color(color), format_color(bg), alpha)
+end
+
+function brighten_color(color, alpha, bg)
+	bg = bg or palette().text
+	return require("snacks").util.blend(format_color(color), format_color(bg), alpha)
 end
 
 local function highlights(key)
@@ -289,7 +263,6 @@ local function build_icon_pill(filename, filetype)
 
 	return build_pill({}, center, right, "provider")
 end
-
 function bg(color)
 	if type(color) == "string" then
 		return fmt(color)
@@ -342,7 +315,7 @@ function build_pill(left, center, right, key, opts)
 
 	result:insert { [key] = separators.left, hl = { fg = bg(center.hl or center[1].hl), bg = bg(default_bg) } }
 	result:insert(center)
-		prev_color = center.hl or center[1].hl
+	prev_color = center.hl or center[1].hl
 
 	for _, item in ipairs(right) do
 		if not item.condition or item:condition() then
@@ -351,6 +324,7 @@ function build_pill(left, center, right, key, opts)
 			prev_color = item.hl
 		end
 	end
+
 
 	result:insert { [key] = separators.right, hl = { fg = bg(prev_color), bg = bg(default_bg) } }
 
