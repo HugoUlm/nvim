@@ -11,112 +11,33 @@ local Align = { provider = "%=" }
 
 local default_bg = my_utils.palette().mantle
 
-local Mode = {
-	static = {
-		modes = {
-			n = { "NORMAL", "ErrorMsg" },
-			no = { "NORMAL?", "ModeOperator" },
-			v = { "VISUAL", "ModeVisual" },
-			V = { "VISUAL-L", "ModeVisual" },
-			[""] = { "VISUAL-B", "ModeVisual" },
-			s = { "SELECT", "ModeVisual" },
-			S = { "SELECT-L", "ModeVisual" },
-			[""] = { "SELECT-B", "ModeVisual" },
-			i = { "INSERT", "WarningMsg" },
-			R = { "REPLACE", "ModeReplace" },
-			c = { "COMMAND", "ModeCommand" },
-			["!"] = { "SHELL", "ModeCommand" },
-			r = { "PROMPT", "ModePrompt" },
-			t = { "TERMINAL", "ModeTerminal" },
-		},
-	},
-	init = function(self)
-		local short_mode = vim.fn.mode(1) or "n"
-		local mode = self.modes[short_mode:sub(1, 2)] or self.modes[short_mode:sub(1, 1)] or
-		    { "UNKNOWN", "ModeNormal" }
-		local hl = my_utils.hl(mode[2])
-
-		self[1] = self:new(
-			my_utils.build_pill(
-				{},
-				{ provider = " ", hl = { fg = my_utils.palette().base, bg = hl.fg } },
-				{ { provider = " " .. mode[1], hl = hl } },
-				"provider"
-			),
-			1
-		)
-	end,
-	update = { "ModeChanged" },
-	provider = " ",
-	hl = { bold = true },
+local mode_table = {
+	n = { "NORMAL", "ModeNormal" },
+	no = { "NORMAL?", "ModeOperator" },
+	v = { "VISUAL", "ModeVisual" },
+	V = { "VISUAL-L", "ModeVisual" },
+	["\x16"] = { "VISUAL-B", "ModeVisual" },
+	s = { "SELECT", "ModeVisual" },
+	S = { "SELECT-L", "ModeVisual" },
+	["\x13"] = { "SELECT-B", "ModeVisual" },
+	i = { "INSERT", "ModeInsert" },
+	R = { "REPLACE", "ModeReplace" },
+	c = { "COMMAND", "ModeCommand" },
+	["!"] = { "SHELL", "ModeCommand" },
+	r = { "PROMPT", "ModePrompt" },
+	t = { "TERMINAL", "ModeTerminal" },
 }
-
-local Git = {
-	init = function(self)
-		self.status_dict = vim.b.gitsigns_status_dict
-		self.has_changes = self.status_dict
-		    and (self.status_dict.added ~= 0 or self.status_dict.removed ~= 0 or self.status_dict.changed ~= 0)
-
-		self[1] = self:new(
-			my_utils.build_pill(
-				{},
-				{ provider = vim.fn.nr2char(0xF09B) .. " ", hl = { fg = my_utils.palette().base, bg = utils.get_highlight("@variable.parameter").fg } },
-				{ { provider = " " .. self.head, hl = { fg = utils.get_highlight("@variable.parameter").fg, bg = my_utils.darken(utils.get_highlight("@variable.parameter").fg, 0.3) } } },
-				"provider"
-			),
-			1
-		)
-	end,
-	condition = function(self)
-		self.head = vim.fn.FugitiveHead()
-		return type(self.head) == "string"
-	end,
-}
-
-local FileName = {
-	flexible = 2,
-	init = function(self)
-		self.relname = vim.fn.fnamemodify(self.filename, ":.")
-		local ext = vim.fn.fnamemodify(self.filename, ":e")
-		if self.relname == "" then
-			self.relname = "[No Name]"
-		end
-		self.icon, self.color = require("nvim-web-devicons").get_icon_color(self.filename, ext,
-			{ default = true })
-	end,
-	{
-		provider = function(self)
-			return self.relname
-		end,
-	},
-	{
-		provider = function(self)
-			return vim.fn.pathshorten(self.relname)
-		end,
-	},
-	{
-		provider = function(self)
-			return vim.fn.fnamemodify(self.filename, ":t")
-		end,
-	},
-	hl = function(self)
-		return { bg = default_bg, fg = self.color, bold = true }
-	end,
-}
-
 
 local get_filename = function()
 	local full_path = vim.api.nvim_buf_get_name(0)
 	local home = vim.fn.expand("~")
 	local short_path = full_path:gsub("^" .. vim.pesc(home), "~")
 
-	-- Split the path into parts
 	local parts = {}
 	for part in short_path:gmatch("[^/]+") do
 		table.insert(parts, part)
 	end
 
-	-- Get the last 3 parts (2 folders + filename)
 	local start_index = math.max(#parts - 2, 1)
 	local last_parts = {}
 	for i = start_index, #parts do
@@ -126,21 +47,62 @@ local get_filename = function()
 	return "~/" .. table.concat(last_parts, "/")
 end
 
-local FileNameBlock = {
-	update = { "BufEnter", "DirChanged", "BufModifiedSet", "VimResized" },
+-- Combined Mode + Git + File pill, styled like the LSP pill:
+-- all segments are left-items; same-color sub-items use lite (thin) dividers,
+-- color-change transitions use full arrows.
+local ModeGitFile = {
+	update = { "ModeChanged", "BufEnter", "DirChanged", "BufModifiedSet", "VimResized" },
 	init = function(self)
+		-- Mode
+		local short_mode = vim.fn.mode(1) or "n"
+		local mode = mode_table[short_mode:sub(1, 2)] or mode_table[short_mode:sub(1, 1)] or
+		    { "UNKNOWN", "ModeNormal" }
+		local mode_hl = my_utils.hl(mode[2])
+		local mode_icon_hl = { fg = my_utils.palette().base, bg = mode_hl.fg }
+
+		-- File
+		local fname = vim.api.nvim_buf_get_name(0)
+		local ext = vim.fn.fnamemodify(fname, ":e")
 		local short_path = get_filename()
-		self.filename = vim.api.nvim_buf_get_name(0)
-		local ext = vim.fn.fnamemodify(self.filename, ":e")
+		local devicons = require("nvim-web-devicons")
+		local file_icon = devicons.get_icon(short_path, ext, { default = true })
+		if not file_icon then file_icon = "" end
+		local file_icon_bg = my_utils.get_icon_color(fname, ext)
+		local file_text_bg = my_utils.darken(file_icon_bg, 0.3)
+		local file_icon_hl = { fg = my_utils.palette().base, bg = file_icon_bg }
+		local file_text_hl = { fg = file_icon_bg, bg = file_text_bg }
+
+		local items = {}
+
+		-- Mode icon (i=1, always full arrow)
+		table.insert(items, { provider = " ", hl = mode_icon_hl })
+		-- Mode text (full arrow transition from bright icon to dark text)
+		table.insert(items, { provider = " " .. mode[1] .. " ", hl = mode_hl })
+
+		-- Git (full color-change arrow from mode, then thin divider for text)
+		local git_head = vim.fn.FugitiveHead()
+		if type(git_head) == "string" and git_head ~= "" then
+			local git_bg_raw = utils.get_highlight("@variable.parameter").fg
+			local git_icon_bg = type(git_bg_raw) == "number" and string.format("#%06x", git_bg_raw) or git_bg_raw
+			local git_text_bg = my_utils.darken(git_icon_bg, 0.3)
+			table.insert(items, { provider = vim.fn.nr2char(0xF09B) .. " ", hl = { fg = my_utils.palette().base, bg = git_icon_bg } })
+			table.insert(items, { provider = " " .. git_head .. " ", hl = { fg = git_icon_bg, bg = git_text_bg } })
+		end
+
+		-- File icon (full color-change arrow from git/mode, then thin divider for text)
+		table.insert(items, { provider = file_icon .. " ", hl = file_icon_hl })
+		table.insert(items, { provider = " " .. short_path .. " ", hl = file_text_hl })
+
+		-- Dummy center with same bg as last item so separator is invisible
+		local dummy = { provider = "", hl = file_text_hl }
 
 		self[1] = self:new(
-			my_utils.build_icon_pill(
-				short_path,
-				ext
-			),
+			my_utils.build_pill(items, dummy, {}, "provider", { no_start_sep = true }),
 			1
 		)
 	end,
+	provider = " ",
+	hl = { bold = true },
 }
 
 
@@ -194,7 +156,10 @@ local LSP = {
 	update = { "LspAttach", "LspDetach", "BufEnter", "DiagnosticChanged" },
 
 	init = function(self)
-		local servers = {}
+		local lsp_hl = my_utils.hl_override().CustomTablineLsp
+		local lsp_active_hl = my_utils.hl_override().CustomTablineLspActive
+		local lsp_inactive_hl = my_utils.hl_override().CustomTablineLspInactive
+
 		local active_clients = map_to_names(self.active_clients)
 		local buffer_clients = map_to_names(vim.lsp.get_clients { bufnr = vim.api.nvim_get_current_buf() })
 		local counted_clients = {}
@@ -203,34 +168,31 @@ local LSP = {
 			counted_clients[client] = (counted_clients[client] or 0) + 1
 		end
 
-		for client, count in pairs(counted_clients) do
-			local text = client
-			if count > 1 then
-				text = text .. " ×" .. count
-			end
-			text = text .. " "
+		-- Gear icon as first item (opening arrow, bright bg)
+		local items = {
+			{ provider = vim.fn.nr2char(0xF085) .. " ", hl = lsp_hl },
+		}
 
-			table.insert(servers, {
+		for client, count in pairs(counted_clients) do
+			local text = " " .. client
+			if count > 1 then text = text .. " ×" .. count end
+			text = text .. " "
+			table.insert(items, {
 				provider = text,
-				hl = vim.tbl_contains(buffer_clients, client) and
-				    my_utils.hl_override().CustomTablineLspActive
-				    or my_utils.hl_override().CustomTablineLspInactive,
-				lite = true,
+				hl = vim.tbl_contains(buffer_clients, client) and lsp_active_hl or lsp_inactive_hl,
 			})
 		end
 
-		table.insert(servers, {
-			provider = "%7(%l/%3L%):%2c ",
-			hl = my_utils.hl_override().CustomTablineLspActive,
-			lite = true,
+		-- Row:col as last item before dummy center
+		table.insert(items, {
+			provider = " %7(%l/%3L%):%2c ",
+			hl = lsp_active_hl,
 		})
 
+		local dummy = { provider = "", hl = lsp_active_hl }
+
 		self[1] = self:new(
-			my_utils.build_pill(servers,
-				{ provider = vim.fn.nr2char(0xF085) .. " ", hl = my_utils.hl_override().CustomTablineLsp, lite = true },
-				{ provider = " ", hl = my_utils.hl_override().CustomTablineLsp, lite = true },
-				"provider"
-			),
+			my_utils.build_pill(items, dummy, {}, "provider", { no_start_sep = true }),
 			1
 		)
 		self[2] = self:new({ provider = " " }, 2)
@@ -238,11 +200,7 @@ local LSP = {
 }
 
 local DefaultStatusLine = {
-	Mode,
-	Space,
-	Git,
-	Space,
-	FileNameBlock,
+	ModeGitFile,
 	Align,
 	Diagnostics,
 	Space,
@@ -270,11 +228,32 @@ local TerminalName = {
 	hl = { bold = true },
 }
 
+local TerminalMode = {
+	update = { "ModeChanged" },
+	init = function(self)
+		local short_mode = vim.fn.mode(1) or "n"
+		local mode = mode_table[short_mode:sub(1, 2)] or mode_table[short_mode:sub(1, 1)] or
+		    { "UNKNOWN", "ModeNormal" }
+		local mode_hl = my_utils.hl(mode[2])
+		self[1] = self:new(
+			my_utils.build_pill(
+				{},
+				{ provider = vim.fn.nr2char(0xf36f) .. " ", hl = { fg = my_utils.palette().base, bg = mode_hl.fg } },
+				{ { provider = " " .. mode[1], hl = mode_hl } },
+				"provider"
+			),
+			1
+		)
+	end,
+	provider = " ",
+	hl = { bold = true },
+}
+
 local TerminalStatusline = {
 	condition = function()
 		return conditions.buffer_matches({ buftype = { "terminal" } })
 	end,
-	{ condition = conditions.is_active, Mode, Space },
+	{ condition = conditions.is_active, TerminalMode, Space },
 	Align,
 	TerminalName,
 	Align,

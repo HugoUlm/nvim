@@ -276,7 +276,20 @@ local function highlights(key)
 	return vim.api.nvim_get_hl(0, { name = key, link = false })
 end
 
-local function build_icon_pill(filename, filetype)
+local function get_icon_color(filename, filetype)
+	local devicons = require("nvim-web-devicons")
+	local _, icon_hl = devicons.get_icon(filename, filetype, { default = true })
+	local fg = palette().text
+	if icon_hl then
+		local hl = vim.api.nvim_get_hl(0, { name = icon_hl, link = true })
+		if hl and hl.fg then
+			fg = format_color(hl.fg)
+		end
+	end
+	return fg
+end
+
+local function build_icon_pill(filename, filetype, opts)
 	local devicons = require("nvim-web-devicons")
 	local icon, icon_hl = devicons.get_icon(filename, filetype, { default = true })
 
@@ -310,7 +323,7 @@ local function build_icon_pill(filename, filetype)
 		},
 	})
 
-	return build_pill({}, center, right, "provider")
+	return build_pill({}, center, right, "provider", opts)
 end
 function bg(color)
 	if type(color) == "string" then
@@ -336,9 +349,6 @@ function build_pill(left, center, right, key, opts)
 	key = key or "provider"
 	local result = {
 		insert = function(self, item)
-			if opts then
-				vim.tbl_extend("force", item, opts)
-			end
 			table.insert(self.content, item)
 		end,
 		content = {},
@@ -361,8 +371,12 @@ function build_pill(left, center, right, key, opts)
 	end
 
 	local default_bg = palette().mantle
+	local start_bg = (opts and opts.start_bg) or default_bg
+	local end_bg   = (opts and opts.end_bg)   or default_bg
 
-	result:insert { [key] = separators.left, hl = { fg = bg(center.hl or center[1].hl), bg = bg(default_bg) } }
+	if not (opts and opts.no_start_sep) then
+		result:insert { [key] = separators.left, hl = { fg = bg(center.hl or center[1].hl), bg = bg(start_bg) } }
+	end
 	result:insert(center)
 	prev_color = center.hl or center[1].hl
 
@@ -374,8 +388,7 @@ function build_pill(left, center, right, key, opts)
 		end
 	end
 
-
-	result:insert { [key] = separators.right, hl = { fg = bg(prev_color), bg = bg(default_bg) } }
+	result:insert { [key] = separators.right, hl = { fg = bg(prev_color), bg = bg(end_bg) } }
 
 	return result.content
 end
@@ -388,4 +401,5 @@ return {
 	hl_override = hl_override,
 	build_pill = build_pill,
 	build_icon_pill = build_icon_pill,
+	get_icon_color = get_icon_color,
 }

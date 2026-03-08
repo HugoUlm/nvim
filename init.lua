@@ -70,6 +70,7 @@ require("lazy").setup({
   require("hugoulm.plugins.tiny-code-action"),
   require("hugoulm.plugins.snacks"),
   require("hugoulm.plugins.harpoon"),
+  require("hugoulm.plugins.copilot-chat"),
 }, {
   ui = {
     icons = vim.g.have_nerd_font and {} or {

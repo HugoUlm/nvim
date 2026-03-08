@@ -26,7 +26,7 @@ vim.keymap.set("v", "C", "<C-q>")
 
 vim.keymap.set("n", "<C-n>", ":Neotree toggle<CR>")
 
-vim.keymap.set("n", "<C-s>", ":LetItSnow<CR>")
+vim.keymap.set("n", "<C-w>", ":LetItSnow<CR>")
 
 vim.keymap.set("n", "dgw", ":g/<C-r><C-w>/d", { desc = "Delete all occurrences of current word" })
 vim.keymap.set(
@@ -65,4 +65,3 @@ end, { desc = "Add buffer to Harpoon" })
 vim.keymap.set("n", "<leader>af", function()
 	require("harpoon.ui").toggle_quick_menu()
 end, { desc = "Toggle Harpoon menu" })
-

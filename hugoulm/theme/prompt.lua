@@ -289,6 +289,28 @@ function M.apply()
   hl(0, "IlluminatedWordText",  { bg = p.bg_visual })
   hl(0, "IlluminatedWordRead",  { bg = p.bg_visual })
   hl(0, "IlluminatedWordWrite", { bg = p.bg_visual })
+
+  -- Mode indicator highlights (used by statusline Mode component)
+  local function blend(fg, bg, alpha)
+    local function hex(c) return tonumber(c:gsub("#", ""), 16) end
+    local function ch(c, s) return math.floor(c / s) % 256 end
+    local function mix(f, b) return math.floor(alpha * f + (1 - alpha) * b + 0.5) end
+    local fh, bh = hex(fg), hex(bg)
+    local r = mix(ch(fh, 0x10000), ch(bh, 0x10000))
+    local g = mix(ch(fh, 0x100),   ch(bh, 0x100))
+    local b2= mix(ch(fh, 0x1),     ch(bh, 0x1))
+    return string.format("#%02x%02x%02x", r, g, b2)
+  end
+  local function mode_hl(fg) return { fg = fg, bg = blend(fg, p.bg, 0.33), bold = true } end
+
+  hl(0, "ModeNormal",   mode_hl(p.red))
+  hl(0, "ModeInsert",   mode_hl(p.yellow))
+  hl(0, "ModeVisual",   mode_hl(p.purple))
+  hl(0, "ModeOperator", mode_hl(p.blue))
+  hl(0, "ModeReplace",  mode_hl(p.blue))
+  hl(0, "ModeCommand",  mode_hl(p.teal))
+  hl(0, "ModePrompt",   mode_hl(p.teal))
+  hl(0, "ModeTerminal", mode_hl(p.green))
 end
 
 return M
