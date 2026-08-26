@@ -1,23 +1,24 @@
+-- Rose Pine palette — matches ThePrimeagen's actual Neovim colorscheme.
 return {
-  bg         = "#1a1a2e",
-  bg_dark    = "#141420",
-  bg_float   = "#1e1e32",
-  bg_visual  = "#2a2040",
-  bg_search  = "#2d2550",
-  fg         = "#ffffff",
-  fg_dark    = "#c8c8d8",
-  fg_gutter  = "#4a4a6a",
+  bg         = "#1f1d2e", -- surface
+  bg_dark    = "#191724", -- base
+  bg_float   = "#26233a", -- overlay
+  bg_visual  = "#403d52", -- highlight_med
+  bg_search  = "#524f67", -- highlight_high
+  fg         = "#e0def4", -- text
+  fg_dark    = "#908caa", -- subtle
+  fg_gutter  = "#6e6a86", -- muted
   none       = "NONE",
-  purple     = "#C591E8",
-  green      = "#69FF94",
-  green_dark = "#66F68F",
-  teal       = "#56B6C2",
-  blue       = "#5FAAE8",
-  red        = "#D0666F",
-  yellow     = "#DCB977",
-  comment    = "#6a6a8a",
-  diff_add   = "#1e3a28",
-  diff_del   = "#3a1e22",
-  diff_change = "#1e2e3a",
-  diff_text  = "#2a3e50",
+  purple     = "#c4a7e7", -- iris
+  green      = "#f6c177", -- gold (rose-pine strings)
+  green_dark = "#ebbcba", -- rose
+  teal       = "#9ccfd8", -- foam
+  blue       = "#31748f", -- pine
+  red        = "#eb6f92", -- love
+  yellow     = "#f6c177", -- gold
+  comment    = "#6e6a86", -- muted
+  diff_add   = "#1f2a24",
+  diff_del   = "#2a1f24",
+  diff_change = "#1f242a",
+  diff_text  = "#26303a",
 }

@@ -124,9 +124,9 @@ function M.apply()
   hl(0, "DiagnosticUnderlineInfo",   { sp = p.teal,   undercurl = true })
   hl(0, "DiagnosticUnderlineHint",   { sp = p.blue,   undercurl = true })
   hl(0, "DiagnosticVirtualTextError",{ fg = p.red,    bg = p.diff_del })
-  hl(0, "DiagnosticVirtualTextWarn", { fg = p.yellow, bg = "#2e2a18" })
-  hl(0, "DiagnosticVirtualTextInfo", { fg = p.teal,   bg = "#182028" })
-  hl(0, "DiagnosticVirtualTextHint", { fg = p.blue,   bg = "#18202e" })
+  hl(0, "DiagnosticVirtualTextWarn", { fg = p.yellow, bg = "#2a2a1a" })
+  hl(0, "DiagnosticVirtualTextInfo", { fg = p.teal,   bg = "#1a2828" })
+  hl(0, "DiagnosticVirtualTextHint", { fg = p.blue,   bg = "#1a2028" })
   hl(0, "DiagnosticSignError",       { fg = p.red })
   hl(0, "DiagnosticSignWarn",        { fg = p.yellow })
   hl(0, "DiagnosticSignInfo",        { fg = p.teal })
@@ -311,6 +311,12 @@ function M.apply()
   hl(0, "ModeCommand",  mode_hl(p.teal))
   hl(0, "ModePrompt",   mode_hl(p.teal))
   hl(0, "ModeTerminal", mode_hl(p.green))
+
+  -- Primeagen-style transparency: let the terminal background show through
+  -- for the main editor surface and floating windows.
+  hl(0, "Normal",      { fg = p.fg, bg = p.none })
+  hl(0, "NormalFloat", { fg = p.fg, bg = p.none })
+  hl(0, "SignColumn",  { fg = p.fg_gutter, bg = p.none })
 end
 
 return M
